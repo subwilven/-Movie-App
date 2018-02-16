@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Movie App</string>
+
+    <string name="sort_type_default" translatable="false">popular</string>
+    <string name="poster_image_content_description">Movie Poster</string>
+    <string name="release_date">Release Date</string>
+    <string name="vote_average">Vote Average</string>
+    <string name="menu_settings">Settings</string>
+    <string name="videos">Videos</string>
+    <string name="reviews">Reviews</string>
+    <string name="favorite">favorite</string>
+    <string name="no_video_results">No Videos Found</string>
+    <string name="no_reviews_results">No Reviews Found</string>
+    <string name="no_connection">No Internet Connection"</string>
+</resources>
