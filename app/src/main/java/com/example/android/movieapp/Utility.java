@@ -18,7 +18,7 @@ import java.util.Scanner;
  */
 
 public class Utility {
-    public final static String basicUrl = "http://api.themoviedb.org/";
+    public final static String basicUrl = "http://api.themoviedb.org/3/movie/";
     private final static String api = "api_key";
 
     public static boolean haveNetworkConnection(Context context) {

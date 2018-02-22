@@ -1,10 +1,12 @@
 package com.example.android.movieapp.POJO;
 
+import java.io.Serializable;
+
 /**
  * Created by eslam on 21-Feb-18.
  */
 
-public class Movie {
+public class Movie implements Serializable{
     private String id;
     private String overview;
     private String original_title;

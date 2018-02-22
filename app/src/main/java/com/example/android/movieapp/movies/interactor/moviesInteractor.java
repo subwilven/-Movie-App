@@ -15,7 +15,7 @@ public class moviesInteractor {
 
 
     public interface MoviesApi {
-        @GET("3/movie/{path}")
+        @GET("{path}")
         Call<MoviesResult> getMovies(@Path(value = "path", encoded = true) String path2,
                                      @Query("api_key") String key);
     }

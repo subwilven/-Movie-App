@@ -22,6 +22,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.movieapp.POJO.Movie;
 import com.example.android.movieapp.data.MovieAppContract;
 import com.example.android.movieapp.data.MovieAppContract.MovieEntry;
 import com.squareup.picasso.Picasso;
@@ -35,7 +36,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
 
     private final String BUNDLE_REVIEWS_RECYCLER_POSITION = "reivews_recycler_position";
     private final String BUNDLE_VIDEOS_RECYCLER_POSITION = "videos_recycler_position";
-    private String data;
+    private Movie movie;
     private TextView overviewTextView;
     private TextView titleTextView;
     private ImageView posterImageView;
@@ -44,7 +45,6 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
     // private Button addToFavoriteButton;
 
     private boolean isFavorite;
-    String[] movieData;
 
     boolean videosReady =false;
     boolean reviewsReady=false;
@@ -95,7 +95,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
         Intent intent = getIntent();
-        data = intent.getStringExtra("data");
+        movie = (Movie) intent.getSerializableExtra("data");
         mSavedInstanceState = savedInstanceState;
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
@@ -118,7 +118,6 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         reviewsAdapter = new ReviewsAdapter();
         videoAdapter = new VideosAdapter(this);
 
-        movieData = data.split("&&&");
 
         DividerItemDecoration mDividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
 
@@ -143,15 +142,15 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
             noReviwsResult.setText(getString(R.string.no_connection));
         }
 
-        getSupportActionBar().setTitle(movieData[0]);
+        getSupportActionBar().setTitle(movie.getOriginal_title());
 
-        overviewTextView.setText(movieData[1]);
-        getSupportActionBar().setTitle(movieData[0]);
+        overviewTextView.setText(movie.getOverview());
+        getSupportActionBar().setTitle(movie.getOriginal_title());
         //  titleTextView.setText(movieData[0]);
-        releaseDateTextView.setText(movieData[4]);
-        voteAverageTextView.setText(movieData[3]);
+        releaseDateTextView.setText(movie.getRelease_date());
+        voteAverageTextView.setText(movie.getVote_average());
 
-        Picasso.with(this).load(buildImageUrl(movieData[2])).into(posterImageView);
+        Picasso.with(this).load(buildImageUrl(movie.getPoster_path())).into(posterImageView);
         checkIfFavorite();
     }
 
@@ -183,12 +182,12 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
                     @Override
                     protected Object doInBackground(Object[] objects) {
                         ContentValues movieValues = new ContentValues();
-                        movieValues.put(MovieEntry._ID, movieData[5]);
-                        movieValues.put(MovieEntry.COL_MOVIE_OVERVIEW, movieData[1]);
-                        movieValues.put(MovieEntry.COL_MOVIE_RELEASE_DATE, movieData[4]);
-                        movieValues.put(MovieEntry.COL_MOVIE_TITLE, movieData[0]);
-                        movieValues.put(MovieEntry.COL_MOVIE_VOTE_AVERAGE, movieData[3]);
-                        movieValues.put(MovieEntry.COL_MOVIE_POSTER, movieData[2]);
+                        movieValues.put(MovieEntry._ID, movie.getId());
+                        movieValues.put(MovieEntry.COL_MOVIE_OVERVIEW, movie.getOverview());
+                        movieValues.put(MovieEntry.COL_MOVIE_RELEASE_DATE, movie.getRelease_date());
+                        movieValues.put(MovieEntry.COL_MOVIE_TITLE, movie.getOriginal_title());
+                        movieValues.put(MovieEntry.COL_MOVIE_VOTE_AVERAGE,movie.getVote_average());
+                        movieValues.put(MovieEntry.COL_MOVIE_POSTER,movie.getPoster_path());
                         getContentResolver().insert(MovieEntry.CONTENT_URI, movieValues);
                         return null;
                     }
@@ -205,7 +204,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
                 AsyncTask deleteMoviefromDataBase = new AsyncTask() {
                     @Override
                     protected Object doInBackground(Object[] objects) {
-                        getContentResolver().delete(MovieAppContract.MovieEntry.buildMovieWithIDUri(movieData[5]), null, null);
+                        getContentResolver().delete(MovieAppContract.MovieEntry.buildMovieWithIDUri(movie.getId()), null, null);
                         return null;
                     }
 
@@ -228,7 +227,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         AsyncTask checkIfMovieIsFavroite = new AsyncTask<Object, Void, Cursor>() {
             @Override
             protected Cursor doInBackground(Object... voids) {
-                Cursor cursor = getContentResolver().query(MovieEntry.buildMovieWithIDUri(movieData[5])
+                Cursor cursor = getContentResolver().query(MovieEntry.buildMovieWithIDUri(movie.getId())
                         , new String[]{MovieEntry._ID}
                         , null
                         , null
@@ -333,7 +332,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         };
 
         FetchReviewsData fetchReviewsData = new FetchReviewsData(handleReviewsResults);
-        fetchReviewsData.execute(movieData[5]);
+        fetchReviewsData.execute(movie.getId());
 
     }
 
@@ -371,7 +370,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         };
 
         FetchVideosData fetchVideosData = new FetchVideosData(handleVideosResults);
-        fetchVideosData.execute(movieData[5]);
+        fetchVideosData.execute(movie.getId());
     }
 
 

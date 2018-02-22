@@ -15,7 +15,6 @@ import android.widget.TextView;
 import com.example.android.movieapp.POJO.Movie;
 import com.squareup.picasso.Picasso;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -151,7 +150,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             } else // when using data from API
 
             {
-                detailsActivityIntent.putExtra("data",  mData.get(position));
+                detailsActivityIntent.putExtra("data", mData.get(position));
             }
 
             context.startActivity(detailsActivityIntent);
