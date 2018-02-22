@@ -12,7 +12,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.android.movieapp.POJO.Movie;
 import com.squareup.picasso.Picasso;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by eslam on 01-Oct-17.
@@ -22,7 +26,7 @@ import com.squareup.picasso.Picasso;
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
 
     //use data from API
-    private String[] mData;
+    private List<Movie> mData;
     private final Context context;
     private boolean useCursor;
     //use data from database
@@ -33,7 +37,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     }
 
     //start using API  data
-    void setAdapterData(String[] movies) {
+    void setAdapterData(List<Movie> movies) {
         this.mData = movies;
         notifyDataSetChanged();
         useCursor = false;
@@ -59,6 +63,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     private String buildImageUrl(String posterPath) {
         String BASIC_IMAGE_URL = "http://image.tmdb.org/t/p/";
         String IMAGE_SIZE = "w342";
+        posterPath = posterPath.replace("/", "");
         Uri builderUri = Uri.parse(BASIC_IMAGE_URL).buildUpon()
                 .appendPath(IMAGE_SIZE)
                 .appendPath(posterPath)
@@ -85,10 +90,9 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             holder.setMoviePoster(cursor.getString(MainActivity.COL_POSTER));
 
         } else {//when using data from API
-            String movie = mData[position];
-            String[] splits = movie.split("&&&");
-            holder.setMovieTitle(splits[0]);
-            holder.setMoviePoster(splits[2]);
+            Movie movie = mData.get(position);
+            holder.setMovieTitle(movie.getOriginal_title());
+            holder.setMoviePoster(movie.getPoster_path());
         }
 
     }
@@ -99,7 +103,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             return cursor.getCount();
         } else {
             if (mData != null) {
-                return mData.length;
+                return mData.size();
             } else
                 return 0;
         }
@@ -121,6 +125,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         void setMoviePoster(String posterPath) {
             String url = buildImageUrl(posterPath);
             Log.i("image url", url);
+
             Picasso.with(context).load(url).into(moviePosterImageView);
         }
 
@@ -146,7 +151,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             } else // when using data from API
 
             {
-                detailsActivityIntent.putExtra("data", mData[position]);
+                detailsActivityIntent.putExtra("data",  mData.get(position));
             }
 
             context.startActivity(detailsActivityIntent);

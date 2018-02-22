@@ -18,10 +18,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import com.example.android.movieapp.POJO.Movie;
+import com.example.android.movieapp.POJO.MoviesResult;
 import com.example.android.movieapp.data.MovieAppContract;
+import com.example.android.movieapp.movies.interactor.moviesInteractor;
 import com.facebook.stetho.Stetho;
 import com.facebook.stetho.okhttp.StethoInterceptor;
 import com.squareup.okhttp.OkHttpClient;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener
@@ -76,21 +87,42 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             if (Utility.haveNetworkConnection(this)) {
                 movieRecyclerView.setVisibility(View.VISIBLE);
                 linearLayout.setVisibility(View.INVISIBLE);
-                FetchMoviesData fetchMoviesData = new FetchMoviesData(new FetchMoviesData.HandleResults() {
+//                FetchMoviesData fetchMoviesData = new FetchMoviesData(new FetchMoviesData.HandleResults() {
+//                    @Override
+//                    public void udpateAdpaterData(String[] strings) {
+//                        moviesAdapter.setAdapterData(strings);
+//                    }
+//
+//                    @Override
+//                    public void scrollToPosition() {
+//                        if (mSavedInstanceState != null) {
+//                            int lastFirstVisiblePosition = mSavedInstanceState.getInt(BUNDLE_RECYCLER_POSITION);
+//                            movieRecyclerView.scrollToPosition(lastFirstVisiblePosition);
+//                        }
+//                    }
+//                });
+//                fetchMoviesData.execute(sortType);
+                Retrofit retrofit = new Retrofit.Builder().baseUrl(Utility.basicUrl)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+
+                moviesInteractor.MoviesApi moviesApi = retrofit.create(moviesInteractor.MoviesApi.class);
+                Call<MoviesResult> connection = moviesApi.getMovies(
+                        sortType,
+                        BuildConfig.Movie_Database_API_KEY);
+                connection.enqueue(new Callback<MoviesResult>() {
                     @Override
-                    public void udpateAdpaterData(String[] strings) {
-                        moviesAdapter.setAdapterData(strings);
+                    public void onResponse(Call<MoviesResult> call, Response<MoviesResult> response) {
+                        moviesAdapter.setAdapterData(response.body().getResults());
                     }
 
                     @Override
-                    public void scrollToPosition() {
-                        if (mSavedInstanceState != null) {
-                            int lastFirstVisiblePosition = mSavedInstanceState.getInt(BUNDLE_RECYCLER_POSITION);
-                            movieRecyclerView.scrollToPosition(lastFirstVisiblePosition);
-                        }
+                    public void onFailure(Call<MoviesResult> call, Throwable t) {
+                        moviesAdapter.setAdapterData((List<Movie>) null);
+
                     }
                 });
-                fetchMoviesData.execute(sortType);
+
             } else {
                 linearLayout.setVisibility(View.VISIBLE);
                 movieRecyclerView.setVisibility(View.INVISIBLE);

@@ -20,7 +20,7 @@ android {
     }
     buildTypes.each {
 
-        it.buildConfigField 'String','Movie_Database_API_KEY' ,'"PUT_YOUR_OWN_KEY"'
+        it.buildConfigField 'String','Movie_Database_API_KEY' ,'"57f39770f3811997696caabee7ffb330"'
 
     }
 }
