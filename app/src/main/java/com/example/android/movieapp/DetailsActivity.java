@@ -149,7 +149,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         //  titleTextView.setText(movieData[0]);
         releaseDateTextView.setText(movie.getRelease_date());
         voteAverageTextView.setText(movie.getVote_average());
-
+movie.setPoster_path(movie.getPoster_path().replace("/", ""));
         Picasso.with(this).load(buildImageUrl(movie.getPoster_path())).into(posterImageView);
         checkIfFavorite();
     }
