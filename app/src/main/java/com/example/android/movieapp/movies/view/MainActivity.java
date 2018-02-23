@@ -1,4 +1,4 @@
-package com.example.android.movieapp;
+package com.example.android.movieapp.movies.view;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,39 +15,28 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 
-import com.example.android.movieapp.POJO.Movie;
-import com.example.android.movieapp.POJO.MoviesResult;
+import com.example.android.movieapp.R;
+import com.example.android.movieapp.SettingsActivity;
+import com.example.android.movieapp.Utility;
 import com.example.android.movieapp.data.MovieAppContract;
-import com.example.android.movieapp.movies.interactor.moviesInteractor;
-import com.facebook.stetho.Stetho;
-import com.facebook.stetho.okhttp.StethoInterceptor;
-import com.squareup.okhttp.OkHttpClient;
-
-import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import com.example.android.movieapp.movies.interactor.MoviesInteractor;
+import com.example.android.movieapp.movies.presenter.MoviesPresenter;
 
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener
-        , LoaderManager.LoaderCallbacks<Cursor> {
+        , LoaderManager.LoaderCallbacks<Cursor>, MoviesView {
 
     private final String BUNDLE_RECYCLER_POSITION = "recycler_position";
     private static final int LOADER_ID = 1234;
     private String sortType;
     private SharedPreferences prefs;
-    private Button refreshButton;
     private RecyclerView movieRecyclerView;
     private MoviesAdapter moviesAdapter;
     LinearLayout linearLayout;
 
-    LoaderManager.LoaderCallbacks<Cursor> callback = MainActivity.this;
+    MoviesPresenter presenter;
 
     public static final String[] MOVIE_COLUMNS =
             new String[]{
@@ -74,62 +63,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         outState.putInt(BUNDLE_RECYCLER_POSITION, lastFirstVisiblePosition);
     }
 
-    private void loadData() {
-        sortType = prefs.getString("sort_type", getString(R.string.sort_type_default));
-        if (sortType.equals(getResources().getString(R.string.favorite))) {
-            if (getSupportLoaderManager().getLoader(LOADER_ID) != null) {
-
-                getSupportLoaderManager().restartLoader(LOADER_ID, null, callback);
-            } else {
-                getSupportLoaderManager().initLoader(LOADER_ID, null, callback);
-            }
-        } else {
-            if (Utility.haveNetworkConnection(this)) {
-                movieRecyclerView.setVisibility(View.VISIBLE);
-                linearLayout.setVisibility(View.INVISIBLE);
-//                FetchMoviesData fetchMoviesData = new FetchMoviesData(new FetchMoviesData.HandleResults() {
-//                    @Override
-//                    public void udpateAdpaterData(String[] strings) {
-//                        moviesAdapter.setAdapterData(strings);
-//                    }
-//
-//                    @Override
-//                    public void scrollToPosition() {
-//                        if (mSavedInstanceState != null) {
-//                            int lastFirstVisiblePosition = mSavedInstanceState.getInt(BUNDLE_RECYCLER_POSITION);
-//                            movieRecyclerView.scrollToPosition(lastFirstVisiblePosition);
-//                        }
-//                    }
-//                });
-//                fetchMoviesData.execute(sortType);
-                Retrofit retrofit = new Retrofit.Builder().baseUrl(Utility.basicUrl)
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .build();
-
-                moviesInteractor.MoviesApi moviesApi = retrofit.create(moviesInteractor.MoviesApi.class);
-                Call<MoviesResult> connection = moviesApi.getMovies(
-                        sortType,
-                        BuildConfig.Movie_Database_API_KEY);
-                connection.enqueue(new Callback<MoviesResult>() {
-                    @Override
-                    public void onResponse(Call<MoviesResult> call, Response<MoviesResult> response) {
-                        moviesAdapter.setAdapterData(response.body().getResults());
-                    }
-
-                    @Override
-                    public void onFailure(Call<MoviesResult> call, Throwable t) {
-                        moviesAdapter.setAdapterData((List<Movie>) null);
-
-                    }
-                });
-
-            } else {
-                linearLayout.setVisibility(View.VISIBLE);
-                movieRecyclerView.setVisibility(View.INVISIBLE);
-            }
-        }
-    }
-
     Bundle mSavedInstanceState;
 
     @Override
@@ -137,44 +70,26 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         super.onCreate(savedInstanceState);
 
         mSavedInstanceState = savedInstanceState;
-        //======================================================================
-        //set up stetho
-        Stetho.InitializerBuilder initializerBuilder =
-                Stetho.newInitializerBuilder(this);
-        initializerBuilder.enableWebKitInspector(
-                Stetho.defaultInspectorModulesProvider(this)
-        );
-        initializerBuilder.enableDumpapp(
-                Stetho.defaultDumperPluginsProvider(getApplicationContext())
-        );
-        Stetho.Initializer initializer = initializerBuilder.build();
-        Stetho.initialize(initializer);
-        OkHttpClient client = new OkHttpClient();
-        client.networkInterceptors().add(new StethoInterceptor());
-        //======================================================================
-
         setContentView(R.layout.activity_main);
         moviesAdapter = new MoviesAdapter(this);
-
-
         linearLayout = (LinearLayout) findViewById(R.id.no_connection_layout);
-        refreshButton = (Button) findViewById(R.id.refresh_button);
-        refreshButton.setOnClickListener(new View.OnClickListener() {
+        presenter=new MoviesPresenter(this,moviesAdapter,new MoviesInteractor());
+
+        findViewById(R.id.refresh_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadData();
+                presenter.loadData();
             }
         });
+
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        sortType = prefs.getString("sort_type", getString(R.string.sort_type_default));
 
 
         movieRecyclerView = (RecyclerView) findViewById(R.id.movie_recycler_view);
-        loadData();
         int NUM_OF_COLUMNS = 2;
         movieRecyclerView.setLayoutManager(new GridLayoutManager(this, NUM_OF_COLUMNS));
         movieRecyclerView.setAdapter(moviesAdapter);
-
+        presenter.loadData();
         if (savedInstanceState != null) {
             final int lastFirstVisiblePosition = savedInstanceState.getInt(BUNDLE_RECYCLER_POSITION);
             //using handler the only way that make the scroll work
@@ -211,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-        loadData();
+        presenter.loadData();
     }
 
     @Override
@@ -228,8 +143,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-
-
         return new CursorLoader(this, MovieAppContract.MovieEntry.CONTENT_URI
                 , MOVIE_COLUMNS
                 , null
@@ -239,11 +152,52 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        moviesAdapter.setAdapterData(data);
+        presenter.onDataReceived(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
+    }
+
+    @Override
+    public void showProgress() {
+
+    }
+
+    @Override
+    public void hideProgress() {
+
+    }
+
+    @Override
+    public boolean checkInternetConnection() {
+        return Utility.haveNetworkConnection(this);
+    }
+
+    @Override
+    public void setNoConnection(boolean thereIsConnection) {
+        if (thereIsConnection) {
+            movieRecyclerView.setVisibility(View.VISIBLE);
+            linearLayout.setVisibility(View.INVISIBLE);
+        } else {
+            linearLayout.setVisibility(View.VISIBLE);
+            movieRecyclerView.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @Override
+    public String getSortType() {
+        return prefs.getString("sort_type", getString(R.string.sort_type_default));
+    }
+
+    @Override
+    public void loadDataFromLoader() {
+        if (getSupportLoaderManager().getLoader(LOADER_ID) != null) {
+
+            getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+        } else {
+            getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        }
     }
 }

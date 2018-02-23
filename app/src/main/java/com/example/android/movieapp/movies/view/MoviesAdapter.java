@@ -1,4 +1,4 @@
-package com.example.android.movieapp;
+package com.example.android.movieapp.movies.view;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,7 +11,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.android.movieapp.DetailsActivity;
 import com.example.android.movieapp.POJO.Movie;
+import com.example.android.movieapp.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -21,7 +23,7 @@ import java.util.List;
  */
 
 @SuppressWarnings("DefaultFileTemplate")
-public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
+public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> implements AdatperView{
 
     //use data from API
     private List<Movie> mData;
@@ -32,30 +34,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
     public MoviesAdapter(Context context) {
         this.context = context;
-    }
-
-    //start using API  data
-    void setAdapterData(List<Movie> movies) {
-        this.mData = movies;
-        notifyDataSetChanged();
-        useCursor = false;
-        if (cursor != null) {//when change the sort to anything but favorite close the cursor
-            cursor.close();
-            cursor = null;
-        }
-
-    }
-    // start using  cursor
-    void setAdapterData(Cursor movies) {
-        this.cursor = movies;
-        notifyDataSetChanged();
-        if (cursor != null) {
-            useCursor = true;
-        }
-        if(mData!=null)
-        {
-            mData=null;
-        }
     }
 
     private String buildImageUrl(String posterPath) {
@@ -106,6 +84,31 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
                 return 0;
         }
 
+    }
+
+    @Override
+    public void sendData(List<Movie> movies) {
+        this.mData = movies;
+        notifyDataSetChanged();
+        useCursor = false;
+        if (cursor != null) {//when change the sort to anything but favorite close the cursor
+            cursor.close();
+            cursor = null;
+        }
+
+    }
+
+    @Override
+    public void sendData(Cursor movies) {
+        this.cursor = movies;
+        notifyDataSetChanged();
+        if (cursor != null) {
+            useCursor = true;
+        }
+        if(mData!=null)
+        {
+            mData=null;
+        }
     }
 
     public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
