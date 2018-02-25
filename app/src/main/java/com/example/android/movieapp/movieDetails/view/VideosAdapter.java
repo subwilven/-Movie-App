@@ -1,4 +1,4 @@
-package com.example.android.movieapp;
+package com.example.android.movieapp.movieDetails.view;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -7,14 +7,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.android.movieapp.POJO.Video;
+import com.example.android.movieapp.R;
+
+import java.util.List;
+
 /**
  * Created by eslam on 15-Oct-17.
  */
 
-public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoHolder> {
+public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoHolder> implements VideosAdapterView{
 
-    private String[] mData;
+    private List<Video> mData;
     OnVideoClicked mOnVideoClicked;
+
+    @Override
+    public void sendData(List<Video> videos) {
+        this.mData = videos;
+        notifyDataSetChanged();
+    }
+
     public interface OnVideoClicked
     {
         void handleOnClickVideo(String key);
@@ -35,27 +47,22 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoHolde
 
     @Override
     public void onBindViewHolder(VideoHolder holder, int position) {
-        String reviewData = mData[position];
-        String[] splits = reviewData.split("&&&");
-        holder.setNameTextView(splits[1]);
-        holder.setSizeTextView(splits[2]);
-        holder.setTypeTextView(splits[3]);
-        holder.setTag(splits[4]);
+        Video video = mData.get(position);
+        holder.setNameTextView(video.getName());
+        holder.setSizeTextView(video.getSize());
+        holder.setTypeTextView(video.getType());
+        holder.setTag(video.getKey());
     }
 
     @Override
     public int getItemCount() {
         if (mData != null) {
-            return mData.length;
+            return mData.size();
         } else
             return 0;
 
     }
 
-    public void setAdapterData(String[] data) {
-        this.mData = data;
-        notifyDataSetChanged();
-    }
 
     public class VideoHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 

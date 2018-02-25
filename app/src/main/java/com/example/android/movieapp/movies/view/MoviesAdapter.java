@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.android.movieapp.DetailsActivity;
+import com.example.android.movieapp.movieDetails.view.DetailsActivity;
 import com.example.android.movieapp.POJO.Movie;
 import com.example.android.movieapp.R;
 import com.squareup.picasso.Picasso;

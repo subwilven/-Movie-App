@@ -1,4 +1,4 @@
-package com.example.android.movieapp;
+package com.example.android.movieapp.movieDetails.view;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -7,15 +7,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.android.movieapp.POJO.Review;
+import com.example.android.movieapp.R;
+
+import java.util.List;
+
 /**
  * Created by eslam on 15-Oct-17.
  */
 
-public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewHolder> {
+public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewHolder> implements ReviewsAdapterView{
 
-    private String[] mData;
-
-
+    private List<Review>  mData;
 
     @Override
     public ReviewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -31,23 +34,23 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewHo
     @Override
     public void onBindViewHolder(ReviewHolder holder, int position) {
 
-        String reviewData = mData[position];
-        String[] splits = reviewData.split("&&&");
-        holder.setAuthorTextView(splits[0]);
-        holder.setContentTextView(splits[1]);
+        Review reviewData = mData.get(position);
+        holder.setAuthorTextView(reviewData.getAuthor());
+        holder.setContentTextView(reviewData.getContent());
     }
 
     @Override
     public int getItemCount() {
         if (mData != null) {
-            return mData.length;
+            return mData.size();
         } else
             return 0;
 
     }
 
-    public void setAdapterData(String[] data) {
-        this.mData = data;
+    @Override
+    public void sendData(List<Review> reviews) {
+        mData=reviews;
         notifyDataSetChanged();
     }
 

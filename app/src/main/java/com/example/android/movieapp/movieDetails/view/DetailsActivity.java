@@ -1,4 +1,4 @@
-package com.example.android.movieapp;
+package com.example.android.movieapp.movieDetails.view;
 
 import android.content.ContentValues;
 import android.content.Intent;
@@ -23,8 +23,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.movieapp.POJO.Movie;
+import com.example.android.movieapp.R;
 import com.example.android.movieapp.data.MovieAppContract;
 import com.example.android.movieapp.data.MovieAppContract.MovieEntry;
+import com.example.android.movieapp.movieDetails.interactor.DetailsInteractor;
+import com.example.android.movieapp.movieDetails.presenter.DetailsPresenter;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -32,7 +35,7 @@ import com.squareup.picasso.Picasso;
  */
 
 @SuppressWarnings("ALL")
-public class DetailsActivity extends AppCompatActivity implements VideosAdapter.OnVideoClicked {
+public class DetailsActivity extends AppCompatActivity implements VideosAdapter.OnVideoClicked, DetailsView {
 
     private final String BUNDLE_REVIEWS_RECYCLER_POSITION = "reivews_recycler_position";
     private final String BUNDLE_VIDEOS_RECYCLER_POSITION = "videos_recycler_position";
@@ -46,8 +49,8 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
 
     private boolean isFavorite;
 
-    boolean videosReady =false;
-    boolean reviewsReady=false;
+    boolean videosReady = false;
+    boolean reviewsReady = false;
 
     ProgressBar videoProgressBar;
     ProgressBar reviewsProgressBar;
@@ -64,22 +67,16 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
 
     Bundle mSavedInstanceState;
 
+    private  DetailsPresenter presenter;
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-//   outState.putParcelable(BUNDLE_REVIEWS_RECYCLER_POSITION, reviewRecyclerView.getLayoutManager().onSaveInstanceState());
-////        outState.putParcelable(BUNDLE_VIDEOS_RECYCLER_POSITION, videoRecyclerView.getLayoutManager().onSaveInstanceState());
-//        int lastFirstVisiblePosition = ((LinearLayoutManager)reviewRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-////        int lastVideoVisiblePosition = ((LinearLayoutManager)videoRecyclerView.getLayoutManager()).findFirstCompletelyVisibleItemPosition();
-//        outState.putInt(BUNDLE_REVIEWS_RECYCLER_POSITION,lastFirstVisiblePosition);
-
         outState.putIntArray("ARTICLE_SCROLL_POSITION",
                 new int[]{mScrollView.getScrollX(), mScrollView.getScrollY()});
     }
 
-    public void scrollScrollViewToPosition()
-    {
-        if(videosReady&&reviewsReady) {
+    public void scrollScrollViewToPosition() {
+        if (videosReady && reviewsReady) {
             final int[] position = mSavedInstanceState.getIntArray("ARTICLE_SCROLL_POSITION");
             if (position != null)
                 mScrollView.post(new Runnable() {
@@ -89,6 +86,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
                 });
         }
     }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
@@ -113,11 +111,11 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         reviewsProgressBar = (ProgressBar) findViewById(R.id.pb_loading_reviews);
         noVideosResult = (TextView) findViewById(R.id.tv_no_videos_result);
         noReviwsResult = (TextView) findViewById(R.id.tv_no_reviews_result);
-        mScrollView =(ScrollView)findViewById(R.id.sv_details);
-
+        mScrollView = (ScrollView) findViewById(R.id.sv_details);
         reviewsAdapter = new ReviewsAdapter();
         videoAdapter = new VideosAdapter(this);
 
+        presenter = new DetailsPresenter(this,videoAdapter,reviewsAdapter,new DetailsInteractor());
 
         DividerItemDecoration mDividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
 
@@ -131,25 +129,13 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         videoRecyclerView.setAdapter(videoAdapter);
         videoRecyclerView.setNestedScrollingEnabled(false);
         videoRecyclerView.addItemDecoration(mDividerItemDecoration);
-
-        if (Utility.haveNetworkConnection(this)) {
-            loadReviwsData();
-            loadVideosData();
-            noReviwsResult.setVisibility(View.GONE);
-            noVideosResult.setVisibility(View.GONE);
-        } else {
-            noReviwsResult.setVisibility(View.VISIBLE);
-            noReviwsResult.setText(getString(R.string.no_connection));
-        }
-
-        getSupportActionBar().setTitle(movie.getOriginal_title());
-
+        presenter.loadReviews(movie.getId());
+        presenter.loadVideos(movie.getId());
         overviewTextView.setText(movie.getOverview());
         getSupportActionBar().setTitle(movie.getOriginal_title());
-        //  titleTextView.setText(movieData[0]);
         releaseDateTextView.setText(movie.getRelease_date());
         voteAverageTextView.setText(movie.getVote_average());
-movie.setPoster_path(movie.getPoster_path().replace("/", ""));
+        movie.setPoster_path(movie.getPoster_path().replace("/", ""));
         Picasso.with(this).load(buildImageUrl(movie.getPoster_path())).into(posterImageView);
         checkIfFavorite();
     }
@@ -186,8 +172,8 @@ movie.setPoster_path(movie.getPoster_path().replace("/", ""));
                         movieValues.put(MovieEntry.COL_MOVIE_OVERVIEW, movie.getOverview());
                         movieValues.put(MovieEntry.COL_MOVIE_RELEASE_DATE, movie.getRelease_date());
                         movieValues.put(MovieEntry.COL_MOVIE_TITLE, movie.getOriginal_title());
-                        movieValues.put(MovieEntry.COL_MOVIE_VOTE_AVERAGE,movie.getVote_average());
-                        movieValues.put(MovieEntry.COL_MOVIE_POSTER,movie.getPoster_path());
+                        movieValues.put(MovieEntry.COL_MOVIE_VOTE_AVERAGE, movie.getVote_average());
+                        movieValues.put(MovieEntry.COL_MOVIE_POSTER, movie.getPoster_path());
                         getContentResolver().insert(MovieEntry.CONTENT_URI, movieValues);
                         return null;
                     }
@@ -293,85 +279,56 @@ movie.setPoster_path(movie.getPoster_path().replace("/", ""));
         isFavorite = false;
     }
 
-    public void loadReviwsData() {
-        FetchReviewsData.HandleResults handleReviewsResults = new FetchReviewsData.HandleResults() {
-            @Override
-            public void showNoResultTestView() {
-                noReviwsResult.setVisibility(View.VISIBLE);
-                noReviwsResult.setText(getString(R.string.no_reviews_results));
-            }
-
-            @Override
-            public void updateTheAdapter(String[] strings) {
-                reviewsAdapter.setAdapterData(strings);
-            }
-
-            @Override
-            public void scrollToPosition() {
-                if (mSavedInstanceState != null) {
-//                    Parcelable savedRecyclerLayoutState = mSavedInstanceState.getParcelable(BUNDLE_REVIEWS_RECYCLER_POSITION);
-//                    reviewRecyclerView.getLayoutManager().onRestoreInstanceState(savedRecyclerLayoutState);
-//
-//                    final int lastFirstVisiblePosition =mSavedInstanceState.getInt(BUNDLE_REVIEWS_RECYCLER_POSITION);
-//                    reviewRecyclerView.scrollToPosition(lastFirstVisiblePosition);
-                    reviewsReady=true;
-                    scrollScrollViewToPosition();
-
-                }
-            }
-
-            @Override
-            public void showProgressBar() {
-                reviewsProgressBar.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void hideProgressBar() {
-                reviewsProgressBar.setVisibility(View.GONE);
-            }
-        };
-
-        FetchReviewsData fetchReviewsData = new FetchReviewsData(handleReviewsResults);
-        fetchReviewsData.execute(movie.getId());
-
+    @Override
+    public void showVideosProgress() {
+        videoProgressBar.setVisibility(View.VISIBLE);
     }
 
-    public void loadVideosData() {
-        FetchVideosData.HandleResults handleVideosResults = new FetchVideosData.HandleResults() {
-            @Override
-            public void showNoResultTestView() {
-                noVideosResult.setVisibility(View.VISIBLE);
-                noVideosResult.setText(getString(R.string.no_video_results));
-            }
-
-            @Override
-            public void scrollToPosition() {
-                if(mSavedInstanceState!=null)
-                {
-                    videosReady=true;
-                    scrollScrollViewToPosition();
-                }
-            }
-
-            @Override
-            public void updateTheAdapter(String[] strings) {
-                videoAdapter.setAdapterData(strings);
-            }
-
-            @Override
-            public void showProgressBar() {
-                videoProgressBar.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void hideProgressBar() {
-                videoProgressBar.setVisibility(View.GONE);
-            }
-        };
-
-        FetchVideosData fetchVideosData = new FetchVideosData(handleVideosResults);
-        fetchVideosData.execute(movie.getId());
+    @Override
+    public void hideVideosProgress() {
+        videoProgressBar.setVisibility(View.INVISIBLE);
     }
 
+    @Override
+    public void showReviewsProgress() {
+        reviewsProgressBar.setVisibility(View.VISIBLE);
+    }
 
+    @Override
+    public void hideReviewsProgress() {
+        reviewsProgressBar.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void showNoVideosFound() {
+        noVideosResult.setVisibility(View.VISIBLE);
+        noVideosResult.setText(getString(R.string.no_reviews_results));
+    }
+
+    @Override
+    public void showNoReviewsFound() {
+        noReviwsResult.setVisibility(View.VISIBLE);
+        noReviwsResult.setText(getString(R.string.no_reviews_results));
+    }
+
+    @Override
+    public boolean checkInternetConnection() {
+        return false;
+    }
+
+    @Override
+    public void setNoConnection(boolean thereIsConnection) {
+       if(false)
+       {
+           noReviwsResult.setVisibility(View.VISIBLE);
+           noVideosResult.setVisibility(View.VISIBLE);
+           noReviwsResult.setText(getString(R.string.no_connection));
+           noVideosResult.setText(getString(R.string.no_connection));
+       }
+       else
+       {
+           noReviwsResult.setVisibility(View.INVISIBLE);
+           noVideosResult.setVisibility(View.INVISIBLE);
+       }
+    }
 }
