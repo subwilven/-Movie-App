@@ -130,8 +130,11 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         videoRecyclerView.setAdapter(videoAdapter);
         videoRecyclerView.setNestedScrollingEnabled(false);
         videoRecyclerView.addItemDecoration(mDividerItemDecoration);
+
         presenter.loadReviews(movie.getId());
         presenter.loadVideos(movie.getId());
+
+
         overviewTextView.setText(movie.getOverview());
         getSupportActionBar().setTitle(movie.getOriginal_title());
         releaseDateTextView.setText(movie.getRelease_date());
