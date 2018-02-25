@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.example.android.movieapp.POJO.Movie;
 import com.example.android.movieapp.R;
+import com.example.android.movieapp.Utility;
 import com.example.android.movieapp.data.MovieAppContract;
 import com.example.android.movieapp.data.MovieAppContract.MovieEntry;
 import com.example.android.movieapp.movieDetails.interactor.DetailsInteractor;
@@ -313,7 +314,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
 
     @Override
     public boolean checkInternetConnection() {
-        return false;
+        return Utility.haveNetworkConnection(this);
     }
 
     @Override
