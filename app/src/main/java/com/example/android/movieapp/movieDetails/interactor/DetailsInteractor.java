@@ -4,6 +4,7 @@ import com.example.android.movieapp.BuildConfig;
 import com.example.android.movieapp.POJO.Review;
 import com.example.android.movieapp.POJO.ReviewResults;
 import com.example.android.movieapp.POJO.Video;
+import com.example.android.movieapp.POJO.VideosResults;
 import com.example.android.movieapp.Utility;
 
 import java.util.List;
@@ -28,6 +29,11 @@ public class DetailsInteractor {
         Call<ReviewResults> getReviews(@Path(value = "id", encoded = false) String id,
                                        @Query("api_key") String key);
     }
+    public interface VideosApi {
+        @GET("{id}/videos")
+        Call<VideosResults> getVideos(@Path(value = "id", encoded = false) String id,
+                                      @Query("api_key") String key);
+    }
 
     public interface CallBack {
         void onReviewsReceived(List<Review> reviews);
@@ -35,7 +41,24 @@ public class DetailsInteractor {
     }
 
     public void loadVideosData(String id, final CallBack listener) {
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(Utility.basicUrl)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
+        VideosApi reviewsApi = retrofit.create(VideosApi.class);
+        Call<VideosResults> connection = reviewsApi.getVideos(id, BuildConfig.Movie_Database_API_KEY);
+
+        connection.enqueue(new Callback<VideosResults>() {
+            @Override
+            public void onResponse(Call<VideosResults> call, Response<VideosResults> response) {
+                listener.onVideosReceived(response.body().getResults());
+            }
+
+            @Override
+            public void onFailure(Call<VideosResults> call, Throwable t) {
+
+            }
+        });
 
     }
 

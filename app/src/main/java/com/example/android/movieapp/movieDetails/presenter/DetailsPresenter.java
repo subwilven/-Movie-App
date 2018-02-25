@@ -45,6 +45,10 @@ public class DetailsPresenter implements DetailsInteractor.CallBack {
             mView.setNoConnection(false);
             return;
         }
+        else
+        {
+            mView.setNoConnection(true);
+        }
         mView.showVideosProgress();
         mInteractor.loadVideosData(id, this);
 

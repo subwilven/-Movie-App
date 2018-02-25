@@ -136,8 +136,8 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         getSupportActionBar().setTitle(movie.getOriginal_title());
         releaseDateTextView.setText(movie.getRelease_date());
         voteAverageTextView.setText(movie.getVote_average());
-        movie.setPoster_path(movie.getPoster_path().replace("/", ""));
-        Picasso.with(this).load(buildImageUrl(movie.getPoster_path())).into(posterImageView);
+        movie.setBackdrop_path(movie.getBackdrop_path().replace("/", ""));
+        Picasso.with(this).load(buildImageUrl(movie.getBackdrop_path())).into(posterImageView);
         checkIfFavorite();
     }
 
@@ -319,7 +319,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
 
     @Override
     public void setNoConnection(boolean thereIsConnection) {
-       if(false)
+       if(!thereIsConnection)
        {
            noReviwsResult.setVisibility(View.VISIBLE);
            noVideosResult.setVisibility(View.VISIBLE);

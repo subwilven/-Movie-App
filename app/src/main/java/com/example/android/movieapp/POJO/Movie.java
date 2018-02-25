@@ -13,7 +13,16 @@ public class Movie implements Serializable{
     private String poster_path;
     private String vote_average;
     private String release_date;
+    private String backdrop_path;
 
+    public void setBackdrop_path(String backdrop_path)
+    {
+        this.backdrop_path=backdrop_path;
+    }
+    public String getBackdrop_path()
+    {
+        return backdrop_path;
+    }
     public void setId(String id) {
         this.id = id;
     }
