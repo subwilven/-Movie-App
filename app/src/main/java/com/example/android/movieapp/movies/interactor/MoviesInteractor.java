@@ -51,7 +51,7 @@ public class MoviesInteractor {
 
             @Override
             public void onFailure(Call<MoviesResult> call, Throwable t) {
-
+                int x = 5;
             }
         });
 

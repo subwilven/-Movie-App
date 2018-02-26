@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -13,6 +15,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.graphics.Palette;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,6 +33,7 @@ import com.example.android.movieapp.data.MovieAppContract.MovieEntry;
 import com.example.android.movieapp.movieDetails.interactor.DetailsInteractor;
 import com.example.android.movieapp.movieDetails.presenter.DetailsPresenter;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 /**
  * Created by eslam on 02-Oct-17.
@@ -47,7 +51,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
     private TextView releaseDateTextView;
     private TextView voteAverageTextView;
     // private Button addToFavoriteButton;
-
+    private int mMutedColor = 0xFF333333;
     private boolean isFavorite;
 
     boolean videosReady = false;
@@ -65,10 +69,32 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
     RecyclerView reviewRecyclerView;
 
     RecyclerView videoRecyclerView;
-
+    private DetailsPresenter presenter;
     Bundle mSavedInstanceState;
+    final Target target = new Target() {
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            if (bitmap != null) {
+                Palette p = Palette.generate(bitmap, 12);
+                mMutedColor = p.getDarkMutedColor(0xFF333333);
+                posterImageView.setImageBitmap(bitmap);
+                titleTextView
+                        .setBackgroundColor(mMutedColor);
+                //   updateStatusBar();
+            }
+        }
 
-    private  DetailsPresenter presenter;
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+        }
+    };
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -105,6 +131,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         overviewTextView = (TextView) findViewById(R.id.details_movie_overview);
         releaseDateTextView = (TextView) findViewById(R.id.details_movie_release_date);
         voteAverageTextView = (TextView) findViewById(R.id.details_movie_vote_average);
+        titleTextView = (TextView) findViewById(R.id.details_movie_title);
         posterImageView = (ImageView) findViewById(R.id.details_movie_poster);
         reviewRecyclerView = (RecyclerView) findViewById(R.id.review_recycler_view);
         videoRecyclerView = (RecyclerView) findViewById(R.id.video_recycler_view);
@@ -115,15 +142,13 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         mScrollView = (ScrollView) findViewById(R.id.sv_details);
         reviewsAdapter = new ReviewsAdapter();
         videoAdapter = new VideosAdapter(this);
-
-        presenter = new DetailsPresenter(this,videoAdapter,reviewsAdapter,new DetailsInteractor());
+        presenter = new DetailsPresenter(this, videoAdapter, reviewsAdapter, new DetailsInteractor());
 
         DividerItemDecoration mDividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
 
         reviewRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         reviewRecyclerView.addItemDecoration(mDividerItemDecoration);
         reviewRecyclerView.setAdapter(reviewsAdapter);
-        //reviewRecyclerView.setFocusable(false);
         reviewRecyclerView.setNestedScrollingEnabled(false);
 
         videoRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -134,14 +159,14 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         presenter.loadReviews(movie.getId());
         presenter.loadVideos(movie.getId());
 
-
-        overviewTextView.setText(movie.getOverview());
         getSupportActionBar().setTitle(movie.getOriginal_title());
+        titleTextView.setText(movie.getOriginal_title());
+        overviewTextView.setText(movie.getOverview());
         releaseDateTextView.setText(movie.getRelease_date());
         voteAverageTextView.setText(movie.getVote_average());
         movie.setBackdrop_path(movie.getBackdrop_path().replace("/", ""));
-        Picasso.with(this).load(buildImageUrl(movie.getBackdrop_path())).into(posterImageView);
-        checkIfFavorite();
+        Picasso.with(this).load(buildImageUrl(movie.getBackdrop_path())).into(target);
+       // checkIfFavorite();
     }
 
     private String buildImageUrl(String posterPath) {
@@ -156,11 +181,6 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_details, menu);
-        return true;
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -201,7 +221,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
                     @Override
                     protected void onPostExecute(Object o) {
                         super.onPostExecute(o);
-                        markAsNotFavroite();
+                    //    markAsNotFavroite();
                         Toast.makeText(DetailsActivity.this, "removed from Favorite", Toast.LENGTH_SHORT).show();
                     }
                 };
@@ -231,7 +251,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
                 if (cursor.getCount() > 0) {
                     markAsFavorite();
                 } else {
-                    markAsNotFavroite();
+                   // markAsNotFavroite();
                 }
             }
         };
@@ -268,7 +288,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         if (isFavorite) {
             item.setIcon(android.R.drawable.star_big_on);
         } else {
-            item.setIcon(android.R.drawable.star_big_off);
+      //      item.setIcon(android.R.drawable.star_big_off);
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -278,10 +298,10 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         isFavorite = true;
     }
 
-    private void markAsNotFavroite() {
-        invalidateOptionsMenu();
-        isFavorite = false;
-    }
+//    private void markAsNotFavroite() {
+//        invalidateOptionsMenu();
+//        isFavorite = false;
+//    }
 
     @Override
     public void showVideosProgress() {
@@ -322,17 +342,14 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
 
     @Override
     public void setNoConnection(boolean thereIsConnection) {
-       if(!thereIsConnection)
-       {
-           noReviwsResult.setVisibility(View.VISIBLE);
-           noVideosResult.setVisibility(View.VISIBLE);
-           noReviwsResult.setText(getString(R.string.no_connection));
-           noVideosResult.setText(getString(R.string.no_connection));
-       }
-       else
-       {
-           noReviwsResult.setVisibility(View.INVISIBLE);
-           noVideosResult.setVisibility(View.INVISIBLE);
-       }
+        if (!thereIsConnection) {
+            noReviwsResult.setVisibility(View.VISIBLE);
+            noVideosResult.setVisibility(View.VISIBLE);
+            noReviwsResult.setText(getString(R.string.no_connection));
+            noVideosResult.setText(getString(R.string.no_connection));
+        } else {
+            noReviwsResult.setVisibility(View.INVISIBLE);
+            noVideosResult.setVisibility(View.INVISIBLE);
+        }
     }
 }
