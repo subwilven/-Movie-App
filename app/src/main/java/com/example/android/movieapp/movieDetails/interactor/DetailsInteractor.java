@@ -1,6 +1,7 @@
 package com.example.android.movieapp.movieDetails.interactor;
 
 import com.example.android.movieapp.BuildConfig;
+import com.example.android.movieapp.POJO.Movie;
 import com.example.android.movieapp.POJO.Review;
 import com.example.android.movieapp.POJO.ReviewResults;
 import com.example.android.movieapp.POJO.Video;
@@ -81,5 +82,9 @@ public class DetailsInteractor {
 
             }
         });
+    }
+    public  void addMovieToFavroite(Movie movie)
+    {
+
     }
 }

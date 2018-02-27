@@ -13,4 +13,5 @@ public interface DetailsView {
     void showNoReviewsFound();
     boolean checkInternetConnection();
     void setNoConnection(boolean thereIsConnection);
+    void checkIfFavorite();
 }

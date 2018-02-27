@@ -9,11 +9,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.example.android.movieapp.movieDetails.view.DetailsActivity;
 import com.example.android.movieapp.POJO.Movie;
 import com.example.android.movieapp.R;
+import com.example.android.movieapp.movieDetails.view.DetailsActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -38,7 +37,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
     private String buildImageUrl(String posterPath) {
         String BASIC_IMAGE_URL = "http://image.tmdb.org/t/p/";
-        String IMAGE_SIZE = "w342";
+        String IMAGE_SIZE = "w185";
         posterPath = posterPath.replace("/", "");
         Uri builderUri = Uri.parse(BASIC_IMAGE_URL).buildUpon()
                 .appendPath(IMAGE_SIZE)
@@ -62,12 +61,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     public void onBindViewHolder(MovieViewHolder holder, int position) {
         if (useCursor) {//when using database data
             cursor.moveToPosition(position);
-            holder.setMovieTitle(cursor.getString(MainActivity.COL_TITLE));
             holder.setMoviePoster(cursor.getString(MainActivity.COL_POSTER));
 
         } else {//when using data from API
             Movie movie = mData.get(position);
-            holder.setMovieTitle(movie.getOriginal_title());
             holder.setMoviePoster(movie.getPoster_path());
         }
 
@@ -114,12 +111,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         final ImageView moviePosterImageView;
-        final TextView movieTitleTextView;
 
         public MovieViewHolder(View itemView) {
             super(itemView);
             moviePosterImageView = (ImageView) itemView.findViewById(R.id.movie_poster);
-            movieTitleTextView = (TextView) itemView.findViewById(R.id.movie_title);
             itemView.setOnClickListener(this);
         }
 
@@ -128,10 +123,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
          //          Log.i("image url", url);
 
             Picasso.with(context).load(url).into(moviePosterImageView);
-        }
-
-        void setMovieTitle(String title) {
-            movieTitleTextView.setText(title);
         }
 
         @Override

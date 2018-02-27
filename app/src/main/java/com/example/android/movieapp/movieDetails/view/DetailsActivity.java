@@ -232,8 +232,8 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         }
         return true;
     }
-
-    private void checkIfFavorite() {
+    @Override
+    public void checkIfFavorite() {
         AsyncTask checkIfMovieIsFavroite = new AsyncTask<Object, Void, Cursor>() {
             @Override
             protected Cursor doInBackground(Object... voids) {
@@ -249,9 +249,9 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
             protected void onPostExecute(Cursor cursor) {
                 super.onPostExecute(cursor);
                 if (cursor.getCount() > 0) {
-                    markAsFavorite();
+
                 } else {
-                   // markAsNotFavroite();
+
                 }
             }
         };
