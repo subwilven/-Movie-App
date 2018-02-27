@@ -5,16 +5,14 @@
     android:id="@+id/draw_insets_frame_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context="com.sample.foo.usingcoordinatorlayout.FabAndSnackbarActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appBar"
-        android:fitsSystemWindows="true"
-
         android:layout_width="match_parent"
         android:layout_height="250dp"
         android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
   >
 
         <android.support.design.widget.CollapsingToolbarLayout
@@ -42,11 +40,10 @@
                 android:layout_height="?attr/actionBarSize"
                 android:alpha="1.0"
                 android:elevation="4dp"
-                android:theme="@style/ToolBarStyle"
+                android:theme="@style/AppTheme.AppBarOverlay"
                 app:layout_collapseMode="pin"
-                app:popupTheme="@style/ToolBarStyle"
-                app:theme="@style/ToolBarStyle"
-                app:titleTextAppearance="@style/ToolBarStyle" />
+                app:popupTheme="@style/AppTheme.PopupOverlay"
+                app:titleTextAppearance="@style/AppTheme.Toolbar.Title" />
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 

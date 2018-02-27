@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import com.example.android.movieapp.POJO.Movie;
 import com.example.android.movieapp.R;
 import com.example.android.movieapp.movieDetails.view.DetailsActivity;
+import com.example.android.movieapp.ui.RoundedCornersTransformation;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -122,7 +123,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             String url = buildImageUrl(posterPath);
          //          Log.i("image url", url);
 
-            Picasso.with(context).load(url).into(moviePosterImageView);
+            Picasso.with(context).load(url).transform(new RoundedCornersTransformation(7,0)).into(moviePosterImageView);
         }
 
         @Override
