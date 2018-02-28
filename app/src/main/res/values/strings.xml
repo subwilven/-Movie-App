@@ -12,4 +12,5 @@
     <string name="no_video_results">No Videos Found</string>
     <string name="no_reviews_results">No Reviews Found</string>
     <string name="no_connection">No Internet Connection"</string>
+    <string name="details_movie_type">Action . Drama . History</string>
 </resources>

@@ -78,7 +78,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
                 Palette p = Palette.generate(bitmap, 12);
                 mMutedColor = p.getDarkMutedColor(0xFF333333);
                 posterImageView.setImageBitmap(bitmap);
-                titleTextView
+                findViewById(R.id.min_bar)
                         .setBackgroundColor(mMutedColor);
                 //   updateStatusBar();
             }
@@ -162,7 +162,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         getSupportActionBar().setTitle(movie.getOriginal_title());
         titleTextView.setText(movie.getOriginal_title());
         overviewTextView.setText(movie.getOverview());
-        releaseDateTextView.setText(movie.getRelease_date());
+        releaseDateTextView.setText("("+movie.getReleaseYear()+")");
         voteAverageTextView.setText(movie.getVote_average());
         movie.setBackdrop_path(movie.getBackdrop_path().replace("/", ""));
         Picasso.with(this).load(buildImageUrl(movie.getBackdrop_path())).into(target);

@@ -72,6 +72,11 @@ public class Movie implements Serializable{
     {
         return release_date;
     }
+    public String getReleaseYear()
+    {
+        String[] splits =release_date.split("-");
+        return splits[0];
+    }
 
 
 

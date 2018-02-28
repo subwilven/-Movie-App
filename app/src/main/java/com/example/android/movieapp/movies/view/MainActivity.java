@@ -12,6 +12,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -75,6 +76,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         linearLayout = (LinearLayout) findViewById(R.id.no_connection_layout);
         presenter=new MoviesPresenter(this,moviesAdapter,new MoviesInteractor());
 
+
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         findViewById(R.id.refresh_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
