@@ -102,10 +102,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                     movieRecyclerView.scrollToPosition(lastFirstVisiblePosition);
                 }
             }, 200);
-//            ((GridLayoutManager)movieRecyclerView.getLayoutManager())
-//                    .scrollToPositionWithOffset(lastFirstVisiblePosition,0);
-            //       movieRecyclerView.smoothScrollToPosition(lastFirstVisiblePosition);
-            //      movieRecyclerView.scrollToPosition(lastFirstVisiblePosition);
         }
 
 
