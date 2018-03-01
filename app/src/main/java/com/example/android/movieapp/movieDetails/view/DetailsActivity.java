@@ -11,11 +11,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.support.v7.graphics.Palette;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,39 +35,52 @@ import com.example.android.movieapp.movieDetails.presenter.DetailsPresenter;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by eslam on 02-Oct-17.
  */
 
-@SuppressWarnings("ALL")
+
 public class DetailsActivity extends AppCompatActivity implements VideosAdapter.OnVideoClicked, DetailsView {
 
     private final String BUNDLE_REVIEWS_RECYCLER_POSITION = "reivews_recycler_position";
     private final String BUNDLE_VIDEOS_RECYCLER_POSITION = "videos_recycler_position";
     private Movie movie;
-    private TextView overviewTextView;
-    private TextView titleTextView;
-    private ImageView posterImageView;
-    private TextView releaseDateTextView;
-    private TextView voteAverageTextView;
+
+    @BindView(R.id.details_movie_overview)
+    TextView overviewTextView;
+    @BindView(R.id.details_movie_title)
+    TextView titleTextView;
+    @BindView(R.id.details_movie_poster)
+    ImageView posterImageView;
+    @BindView(R.id.details_movie_release_date)
+    TextView releaseDateTextView;
+    @BindView(R.id.details_movie_vote_average)
+    TextView voteAverageTextView;
     // private Button addToFavoriteButton;
     private int mMutedColor = 0xFF333333;
     private boolean isFavorite;
 
     boolean videosReady = false;
     boolean reviewsReady = false;
-
+    @BindView(R.id.pb_loading_videos)
     ProgressBar videoProgressBar;
+    @BindView(R.id.pb_loading_reviews)
     ProgressBar reviewsProgressBar;
-
+    @BindView(R.id.sv_details)
     ScrollView mScrollView;
+    @BindView(R.id.tv_no_videos_result)
     TextView noVideosResult;
+    @BindView(R.id.tv_no_reviews_result)
     TextView noReviwsResult;
 
     ReviewsAdapter reviewsAdapter;
     VideosAdapter videoAdapter;
+    @BindView(R.id.review_recycler_view)
     RecyclerView reviewRecyclerView;
-
+    @BindView(R.id.video_recycler_view)
     RecyclerView videoRecyclerView;
     private DetailsPresenter presenter;
     Bundle mSavedInstanceState;
@@ -119,27 +132,16 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+        ButterKnife.bind(this);
+
         Intent intent = getIntent();
         movie = (Movie) intent.getSerializableExtra("data");
         mSavedInstanceState = savedInstanceState;
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
+        setSupportActionBar((Toolbar) findViewById(R.id.my_toolbar));
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
-        overviewTextView = (TextView) findViewById(R.id.details_movie_overview);
-        releaseDateTextView = (TextView) findViewById(R.id.details_movie_release_date);
-        voteAverageTextView = (TextView) findViewById(R.id.details_movie_vote_average);
-        titleTextView = (TextView) findViewById(R.id.details_movie_title);
-        posterImageView = (ImageView) findViewById(R.id.details_movie_poster);
-        reviewRecyclerView = (RecyclerView) findViewById(R.id.review_recycler_view);
-        videoRecyclerView = (RecyclerView) findViewById(R.id.video_recycler_view);
-        videoProgressBar = (ProgressBar) findViewById(R.id.pb_loading_videos);
-        reviewsProgressBar = (ProgressBar) findViewById(R.id.pb_loading_reviews);
-        noVideosResult = (TextView) findViewById(R.id.tv_no_videos_result);
-        noReviwsResult = (TextView) findViewById(R.id.tv_no_reviews_result);
-        mScrollView = (ScrollView) findViewById(R.id.sv_details);
         reviewsAdapter = new ReviewsAdapter();
         videoAdapter = new VideosAdapter(this);
         presenter = new DetailsPresenter(this, videoAdapter, reviewsAdapter, new DetailsInteractor());
@@ -158,15 +160,19 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
 
         presenter.loadReviews(movie.getId());
         presenter.loadVideos(movie.getId());
+        setMovieData();
 
+        // checkIfFavorite();
+    }
+
+    public void setMovieData() {
         getSupportActionBar().setTitle(movie.getOriginal_title());
         titleTextView.setText(movie.getOriginal_title());
         overviewTextView.setText(movie.getOverview());
-        releaseDateTextView.setText("("+movie.getReleaseYear()+")");
+        releaseDateTextView.setText("(" + movie.getReleaseYear() + ")");
         voteAverageTextView.setText(movie.getVote_average());
         movie.setBackdrop_path(movie.getBackdrop_path().replace("/", ""));
         Picasso.with(this).load(buildImageUrl(movie.getBackdrop_path())).into(target);
-       // checkIfFavorite();
     }
 
     private String buildImageUrl(String posterPath) {
@@ -221,7 +227,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
                     @Override
                     protected void onPostExecute(Object o) {
                         super.onPostExecute(o);
-                    //    markAsNotFavroite();
+                        //    markAsNotFavroite();
                         Toast.makeText(DetailsActivity.this, "removed from Favorite", Toast.LENGTH_SHORT).show();
                     }
                 };
@@ -232,6 +238,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         }
         return true;
     }
+
     @Override
     public void checkIfFavorite() {
         AsyncTask checkIfMovieIsFavroite = new AsyncTask<Object, Void, Cursor>() {
@@ -288,7 +295,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         if (isFavorite) {
             item.setIcon(android.R.drawable.star_big_on);
         } else {
-      //      item.setIcon(android.R.drawable.star_big_off);
+            //      item.setIcon(android.R.drawable.star_big_off);
         }
         return super.onPrepareOptionsMenu(menu);
     }
