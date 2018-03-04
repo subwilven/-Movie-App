@@ -5,10 +5,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.movieapp.POJO.Video;
 import com.example.android.movieapp.R;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -20,6 +22,7 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoHolde
 
     private List<Video> mData;
     OnVideoClicked mOnVideoClicked;
+    Context mContext;
 
     @Override
     public void sendData(List<Video> videos) {
@@ -38,8 +41,8 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoHolde
     @Override
     public VideoHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        Context context = parent.getContext();
-        LayoutInflater inflater = LayoutInflater.from(context);
+        mContext = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(mContext);
         int layoutID = R.layout.list_item_video;
         View view = inflater.inflate(layoutID, parent, false);
         return new VideoHolder(view);
@@ -50,7 +53,7 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoHolde
         Video video = mData.get(position);
         holder.setNameTextView(video.getName());
         holder.setSizeTextView(video.getSize());
-        holder.setTypeTextView(video.getType());
+        holder.setVideoImage(video.getKey());
         holder.setTag(video.getKey());
     }
 
@@ -69,26 +72,28 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoHolde
 
         final TextView nameTextView;
         final TextView sizeTextView;
-        final TextView typeTextView;
+        final ImageView videoImage;
 
         public VideoHolder(View itemView) {
             super(itemView);
             nameTextView = (TextView) itemView.findViewById(R.id.video_name_text_view);
             sizeTextView = (TextView) itemView.findViewById(R.id.video_size);
-            typeTextView = (TextView) itemView.findViewById(R.id.video_type_text_view);
+            videoImage= (ImageView) itemView.findViewById(R.id.video_image);
             itemView.setOnClickListener(this);
         }
 
+        public void setVideoImage(String key)
+        {
+            Picasso.with(mContext)
+                    .load(buildThumbnailUrl(key))
+                    .into(videoImage);
+        }
         public void setNameTextView(String text) {
             nameTextView.setText(text);
         }
 
         public void setSizeTextView(String text) {
             sizeTextView.setText(text);
-        }
-
-        public void setTypeTextView(String text) {
-            typeTextView.setText(text);
         }
 
         public void setTag(String tag) {
@@ -99,6 +104,9 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoHolde
         public void onClick(View view) {
             mOnVideoClicked.handleOnClickVideo((String)itemView.getTag());
         }
+    }
+    private String buildThumbnailUrl(String videoId) {
+        return "https://img.youtube.com/vi/" + videoId + "/hqdefault.jpg";
     }
 }
 

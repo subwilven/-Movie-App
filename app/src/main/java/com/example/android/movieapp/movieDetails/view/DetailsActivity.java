@@ -65,14 +65,10 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
 
     boolean videosReady = false;
     boolean reviewsReady = false;
-    @BindView(R.id.pb_loading_videos)
-    ProgressBar videoProgressBar;
     @BindView(R.id.pb_loading_reviews)
     ProgressBar reviewsProgressBar;
     @BindView(R.id.sv_details)
     ScrollView mScrollView;
-    @BindView(R.id.tv_no_videos_result)
-    TextView noVideosResult;
     @BindView(R.id.tv_no_reviews_result)
     TextView noReviwsResult;
 
@@ -153,7 +149,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
         reviewRecyclerView.setAdapter(reviewsAdapter);
         reviewRecyclerView.setNestedScrollingEnabled(false);
 
-        videoRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        videoRecyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false));
         videoRecyclerView.setAdapter(videoAdapter);
         videoRecyclerView.setNestedScrollingEnabled(false);
         videoRecyclerView.addItemDecoration(mDividerItemDecoration);
@@ -312,12 +308,11 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
 
     @Override
     public void showVideosProgress() {
-        videoProgressBar.setVisibility(View.VISIBLE);
+
     }
 
     @Override
-    public void hideVideosProgress() {
-        videoProgressBar.setVisibility(View.INVISIBLE);
+    public void hideVideosProgress(){
     }
 
     @Override
@@ -332,8 +327,7 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
 
     @Override
     public void showNoVideosFound() {
-        noVideosResult.setVisibility(View.VISIBLE);
-        noVideosResult.setText(getString(R.string.no_reviews_results));
+
     }
 
     @Override
@@ -351,12 +345,9 @@ public class DetailsActivity extends AppCompatActivity implements VideosAdapter.
     public void setNoConnection(boolean thereIsConnection) {
         if (!thereIsConnection) {
             noReviwsResult.setVisibility(View.VISIBLE);
-            noVideosResult.setVisibility(View.VISIBLE);
             noReviwsResult.setText(getString(R.string.no_connection));
-            noVideosResult.setText(getString(R.string.no_connection));
         } else {
             noReviwsResult.setVisibility(View.INVISIBLE);
-            noVideosResult.setVisibility(View.INVISIBLE);
         }
     }
 }
